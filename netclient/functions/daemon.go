@@ -62,7 +62,7 @@ func Daemon() error {
 // SetupMQTT creates a connection to broker and return client
 func SetupMQTT(cfg *config.ClientConfig) mqtt.Client {
 	opts := mqtt.NewClientOptions()
-	for _, server := range cfg.Node.NetworkSettings.DefaultServerAddrs {
+	for _, server := range cfg.Node.ServerAddrs {
 		if server.Address != "" && server.IsLeader {
 			ncutils.Log(fmt.Sprintf("adding server (%s) to listen on network %s \n", server.Address, cfg.Node.Network))
 			opts.AddBroker(server.Address + ":1883")
@@ -233,10 +233,10 @@ func UpdatePeers(client mqtt.Client, msg mqtt.Message) {
 		insert(peerUpdate.Network, lastPeerUpdate, string(data))
 		ncutils.Log("update peer handler")
 
-		var shouldReSub = shouldResub(cfg.Node.NetworkSettings.DefaultServerAddrs, peerUpdate.ServerAddrs)
+		var shouldReSub = shouldResub(cfg.Node.ServerAddrs, peerUpdate.ServerAddrs)
 		if shouldReSub {
 			Resubscribe(client, &cfg)
-			cfg.Node.NetworkSettings.DefaultServerAddrs = peerUpdate.ServerAddrs
+			cfg.Node.ServerAddrs = peerUpdate.ServerAddrs
 		}
 		file := ncutils.GetNetclientPathSpecific() + cfg.Node.Interface + ".conf"
 		err = wireguard.UpdateWgPeers(file, peerUpdate.Peers)
@@ -371,7 +371,7 @@ func Hello(cfg *config.ClientConfig, network string) {
 func publish(cfg *config.ClientConfig, dest string, msg []byte) error {
 	client := SetupMQTT(cfg)
 	defer client.Disconnect(250)
-	encrypted, encryptErr := ncutils.EncryptWithPublicKey(msg, &cfg.Node.TrafficKeys.Server)
+	encrypted, encryptErr := ncutils.EncryptWithPublicKey(msg, &cfg.Node.TrafficKey)
 	if encryptErr != nil {
 		return encryptErr
 	}

@@ -183,6 +183,5 @@ type ServerAddr struct {
 
 // TrafficKeys - struct to hold public keys
 type TrafficKeys struct {
-	Mine   rsa.PublicKey `json:"mine" bson:"mine" yaml:"mine"`
-	Server rsa.PublicKey `json:"server" bson:"server" yaml:"server"`
+	Key rsa.PublicKey `json:"mine" bson:"mine" yaml:"mine"`
 }

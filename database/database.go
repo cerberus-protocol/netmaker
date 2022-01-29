@@ -46,6 +46,9 @@ const SERVER_UUID_TABLE_NAME = "serveruuid"
 // SERVER_UUID_RECORD_KEY - telemetry thing
 const SERVER_UUID_RECORD_KEY = "serveruuid"
 
+// TRAFFIC_TABLE_NAME - traffic meta data
+const TRAFFIC_TABLE_NAME = "traffic-table"
+
 // DATABASE_FILENAME - database file name
 const DATABASE_FILENAME = "netmaker.db"
 
@@ -130,6 +133,7 @@ func createTables() {
 	createTable(SERVERCONF_TABLE_NAME)
 	createTable(SERVER_UUID_TABLE_NAME)
 	createTable(GENERATED_TABLE_NAME)
+	createTable(TRAFFIC_TABLE_NAME)
 }
 
 func createTable(tableName string) error {

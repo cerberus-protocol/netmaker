@@ -26,10 +26,6 @@ func (s *NodeServiceServer) ReadNode(ctx context.Context, req *nodepb.Object) (*
 		return nil, err
 	}
 
-	node.NetworkSettings, err = logic.GetNetworkSettings(node.Network)
-	if err != nil {
-		return nil, err
-	}
 	node.SetLastCheckIn()
 	// Cast to ReadNodeRes type
 	nodeData, errN := json.Marshal(&node)
@@ -52,15 +48,15 @@ func (s *NodeServiceServer) CreateNode(ctx context.Context, req *nodepb.Object) 
 	if err := json.Unmarshal([]byte(data), &node); err != nil {
 		return nil, err
 	}
-
-	validKey := logic.IsKeyValid(node.Network, node.AccessKey)
-	node.NetworkSettings, err = logic.GetNetworkSettings(node.Network)
-	if err != nil {
-		return nil, err
+	var parentNetwork, errNet = logic.GetParentNetwork(node.Network)
+	if errNet != nil {
+		return nil, errNet
 	}
 
+	validKey := logic.IsKeyValid(node.Network, node.AccessKey)
+
 	if !validKey {
-		if node.NetworkSettings.AllowManualSignUp == "yes" {
+		if parentNetwork.AllowManualSignUp == "yes" {
 			node.IsPending = "yes"
 		} else {
 			return nil, errors.New("invalid key, and network does not allow no-key signups")
@@ -76,17 +72,17 @@ func (s *NodeServiceServer) CreateNode(ctx context.Context, req *nodepb.Object) 
 		}
 	}
 	// TODO consolidate functionality around files
-	node.NetworkSettings.DefaultServerAddrs = serverAddrs
-	key, keyErr := logic.RetrieveTrafficKey()
+	node.ServerAddrs = serverAddrs
+	key, keyErr := logic.RetrieveServerTrafficKey()
 	if keyErr != nil {
 		logger.Log(0, "error retrieving key: ", keyErr.Error())
 		return nil, keyErr
 	}
 
-	node.TrafficKeys = models.TrafficKeys{
-		Mine:   node.TrafficKeys.Mine,
-		Server: key.PublicKey,
+	if err = logic.StoreNodeTrafficKey(node.ID, node.TrafficKey); err != nil { // key exchange
+		return nil, err
 	}
+	node.TrafficKey = key.PublicKey
 
 	err = logic.CreateNode(&node)
 	if err != nil {
@@ -146,10 +142,7 @@ func (s *NodeServiceServer) UpdateNode(ctx context.Context, req *nodepb.Object) 
 	if err != nil {
 		return nil, err
 	}
-	newnode.NetworkSettings, err = logic.GetNetworkSettings(node.Network)
-	if err != nil {
-		return nil, err
-	}
+
 	nodeData, errN := json.Marshal(&newnode)
 	if errN != nil {
 		return nil, err

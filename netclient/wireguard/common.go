@@ -191,7 +191,7 @@ func InitWireguard(node *models.Node, privkey string, peers []wgtypes.PeerConfig
 			if !strings.Contains(output, ifacename) {
 				return errors.New("could not create wg interface for " + ifacename)
 			}
-			ip, mask, err := ncutils.GetNetworkIPMask(nodecfg.NetworkSettings.AddressRange)
+			ip, mask, err := ncutils.GetNetworkIPMask(modcfg.NetworkSettings.AddressRange)
 			if err != nil {
 				log.Println(err.Error())
 				return err
@@ -204,9 +204,9 @@ func InitWireguard(node *models.Node, privkey string, peers []wgtypes.PeerConfig
 
 	//extra network route setting
 	if ncutils.IsFreeBSD() {
-		_, _ = ncutils.RunCmd("route add -net "+nodecfg.NetworkSettings.AddressRange+" -interface "+ifacename, true)
+		_, _ = ncutils.RunCmd("route add -net "+modcfg.NetworkSettings.AddressRange+" -interface "+ifacename, true)
 	} else if ncutils.IsLinux() {
-		_, _ = ncutils.RunCmd("ip -4 route add "+nodecfg.NetworkSettings.AddressRange+" dev "+ifacename, false)
+		_, _ = ncutils.RunCmd("ip -4 route add "+modcfg.NetworkSettings.AddressRange+" dev "+ifacename, false)
 	}
 
 	return err

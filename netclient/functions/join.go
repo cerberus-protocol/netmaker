@@ -135,10 +135,7 @@ func JoinNetwork(cfg config.ClientConfig, privateKey string) error {
 		Endpoint:            cfg.Node.Endpoint,
 		SaveConfig:          cfg.Node.SaveConfig,
 		UDPHolePunch:        cfg.Node.UDPHolePunch,
-		TrafficKeys: models.TrafficKeys{
-			Mine:   rsaPrivKey.PublicKey,
-			Server: rsa.PublicKey{},
-		},
+		TrafficKey:          rsaPrivKey.PublicKey,
 	}
 
 	ncutils.Log("joining " + cfg.Network + " at " + cfg.Server.GRPCAddress)

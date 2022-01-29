@@ -8,19 +8,23 @@ import (
 
 func decryptMsg(nodeid string, msg []byte) ([]byte, error) {
 	logger.Log(0, "found message for decryption: %s \n", string(msg))
-	trafficKey, trafficErr := logic.RetrieveTrafficKey()
+	trafficKey, trafficErr := logic.RetrieveServerTrafficKey()
 	if trafficErr != nil {
 		return nil, trafficErr
 	}
 	return ncutils.DecryptWithPrivateKey(msg, &trafficKey), nil
 }
 
-func encrypt(nodeid string, dest string, msg []byte) ([]byte, error) {
+func encryptMsg(nodeid string, msg []byte) ([]byte, error) {
 	var node, err = logic.GetNodeByID(nodeid)
 	if err != nil {
 		return nil, err
 	}
-	encrypted, encryptErr := ncutils.EncryptWithPublicKey(msg, &node.TrafficKeys.Mine)
+	var key, fetchErr = logic.RetrieveNodeTrafficKey(node.ID) // use nodes traffic key to encrypt msg
+	if fetchErr != nil {
+		return nil, fetchErr
+	}
+	encrypted, encryptErr := ncutils.EncryptWithPublicKey(msg, &key)
 	if encryptErr != nil {
 		return nil, encryptErr
 	}
@@ -30,7 +34,7 @@ func encrypt(nodeid string, dest string, msg []byte) ([]byte, error) {
 func publish(nodeid string, dest string, msg []byte) error {
 	client := SetupMQTT()
 	defer client.Disconnect(250)
-	encrypted, encryptErr := encrypt(nodeid, dest, msg)
+	encrypted, encryptErr := encryptMsg(nodeid, msg)
 	if encryptErr != nil {
 		return encryptErr
 	}

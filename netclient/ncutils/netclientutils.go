@@ -556,7 +556,7 @@ func EncryptWithPublicKey(msg []byte, pub *rsa.PublicKey) ([]byte, error) {
 		return nil, errors.New("invalid public key when decrypting")
 	}
 	hash := sha512.New()
-	ciphertext, err := rsa.EncryptOAEP(hash, crand.Reader, pub, msg, nil)
+	ciphertext, err := rsa.EncryptOAEP(hash, crand.Reader, pub, msg, []byte(""))
 	if err != nil {
 		return nil, err
 	}
@@ -566,7 +566,7 @@ func EncryptWithPublicKey(msg []byte, pub *rsa.PublicKey) ([]byte, error) {
 // DecryptWithPrivateKey decrypts data with private key
 func DecryptWithPrivateKey(ciphertext []byte, priv *rsa.PrivateKey) []byte {
 	hash := sha512.New()
-	plaintext, err := rsa.DecryptOAEP(hash, crand.Reader, priv, ciphertext, nil)
+	plaintext, err := rsa.DecryptOAEP(hash, crand.Reader, priv, ciphertext, []byte(""))
 	if err != nil {
 		return nil
 	}
