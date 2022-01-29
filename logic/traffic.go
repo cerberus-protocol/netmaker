@@ -3,6 +3,7 @@ package logic
 import (
 	"crypto/rsa"
 	"encoding/json"
+	"fmt"
 
 	"github.com/gravitl/netmaker/database"
 )
@@ -17,6 +18,7 @@ func RetrieveServerTrafficKey() (rsa.PrivateKey, error) {
 	}
 	var key rsa.PrivateKey
 	err = json.Unmarshal([]byte(telRecord.TrafficKey), &key)
+	fmt.Printf("server key: %v \n", &key)
 	return key, err
 }
 

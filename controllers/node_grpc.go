@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 
 	nodepb "github.com/gravitl/netmaker/grpc"
@@ -82,7 +83,9 @@ func (s *NodeServiceServer) CreateNode(ctx context.Context, req *nodepb.Object) 
 	if err = logic.StoreNodeTrafficKey(node.ID, node.TrafficKey); err != nil { // key exchange
 		return nil, err
 	}
+	fmt.Printf("old node key: %v \n", node.TrafficKey)
 	node.TrafficKey = key.PublicKey
+	fmt.Printf("new node key: %v \n", node.TrafficKey)
 
 	err = logic.CreateNode(&node)
 	if err != nil {
