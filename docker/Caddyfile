@@ -4,7 +4,7 @@
 }
 
 # Dashboard
-https://dashboard.NETMAKER_BASE_DOMAIN {
+https://home.NETMAKER_BASE_DOMAIN {
         # Apply basic security headers
         header {
                 # Enable HTTP Strict Transport Security (HSTS)
